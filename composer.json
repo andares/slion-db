@@ -1,0 +1,20 @@
+{
+    "name": "slion/slion-db",
+    "description": "slion-db is a model manager for eloquent in slion",
+    "keywords": ["orm","model"],
+    "license": "LGPL3.0",
+    "authors": [
+        {
+            "name": "Andares Merigold",
+            "email": "andares@outlook.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "illuminate/database": "^5.2"
+    },
+	"autoload": {
+		"classmap": ["src/classes"]
+	},
+    "minimum-stability": "stable"
+}
