@@ -11,6 +11,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
+        "slion/slion": "^0.1",
         "illuminate/database": "^5.2"
     },
 	"autoload": {
