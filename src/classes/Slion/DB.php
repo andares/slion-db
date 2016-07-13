@@ -31,15 +31,15 @@ class DB {
         }
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
-        $this->capsule - $capsule;
+        $this->capsule = $capsule;
 
         // 注册hook
         $hook = $container->get('hook');
         /* @var $hook \Slion\Hook */
-        $hook->attach(\Slim\HOOK_BEFORE_RESPONSE, new DB\Vo\Autoload());
+        $hook->attach(\Slion\HOOK_BEFORE_RESPONSE, new DB\Vo\Autoload());
     }
 
-    public function __call(string $name, ... $arguments) {
+    public function __call(string $name, $arguments) {
         $this->capsule->$name(...$arguments);
     }
 }

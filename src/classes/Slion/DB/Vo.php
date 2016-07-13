@@ -20,7 +20,7 @@ abstract class Vo extends \Slion\Meta {
         foreach ($collection as $row) {
             $vo = new $class($row->toArray());
             /* @var $vo self */
-            $result[] = $vo->confirm();
+            $result[] = $vo->confirm()->toArray();
         }
         return $result;
     }
