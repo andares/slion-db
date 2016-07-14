@@ -1,7 +1,7 @@
 <?php
 namespace Slion\DB\Vo;
 
-use \Slion\Http\Dispatcher;
+use Slion\Http\Dispatcher;
 
 /**
  * Description of Autoload
