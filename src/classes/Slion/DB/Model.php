@@ -16,6 +16,10 @@ abstract class Model extends EloquentModel {
 //    public $timestamps    = false;
 //    public $incrementing  = false;
 
+//    protected $hidden   = [];
+//    protected $visible  = [];
+//    protected $appends  = [];
+
 //    protected $fillable = [
 //    ];
 //    protected $casts = [
