@@ -16,9 +16,8 @@ abstract class Vo extends \Slion\Meta {
      */
     public static function makeArray(Collection $collection): array {
         $result = [];
-        $class  = get_called_class();
         foreach ($collection as $row) {
-            $vo = new $class($row->toArray());
+            $vo = new static($row->toArray());
             /* @var $vo self */
             $result[] = $vo->confirm()->toArray();
         }
