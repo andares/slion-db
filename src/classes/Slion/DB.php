@@ -7,6 +7,10 @@ use \Illuminate\Database\Capsule\Manager;
  * Description of DB
  *
  * @author andares
+ *
+ * @method void beginTransaction()
+ * @method void rollBack()
+ * @method void commit()
  */
 class DB {
     /**
@@ -41,5 +45,9 @@ class DB {
 
     public function __call(string $name, $arguments) {
         $this->capsule->$name(...$arguments);
+    }
+
+    public static function __callStatic($method, $parameters) {
+        return Manager::$method(...$parameters);
     }
 }
