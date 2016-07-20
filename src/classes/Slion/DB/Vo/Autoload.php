@@ -10,7 +10,7 @@ use Slion\Http\{Dispatcher, Response};
  */
 class Autoload {
 
-    public function __invoke(Dispatcher $dispatcher, Response $response, \Slim\Container $c) {
+    public function __invoke(Dispatcher $dispatcher, \Slim\Container $c, Response $response) {
         ;
     }
 }
