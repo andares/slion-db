@@ -9,6 +9,15 @@ use Illuminate\Support\Collection;
  * @author andares
  */
 abstract class Vo extends \Slion\Meta {
+    protected static $id_mapping = '';
+
+    public function __construct(array $data = null) {
+        static::$id_mapping && isset($data[static::$id_mapping]) &&
+            $data['id'] = $data[static::$id_mapping];
+
+        parent::__construct($data);
+    }
+
     /**
      *
      * @param Collection $collection
