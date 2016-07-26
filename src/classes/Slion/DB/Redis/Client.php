@@ -8,5 +8,45 @@ namespace Slion\DB\Redis;
  * @author andares
  */
 class Client {
-    //put your code here
+    private $config;
+
+    /**
+     *
+     * @var \Redis
+     */
+    private $redis;
+
+    /**
+     *
+     * @var string
+     */
+    public $error = '';
+
+    public function __construct(array $config) {
+        $this->config = $config;
+        $this->redis  = new \Redis();
+        $this->connect();
+    }
+
+    /**
+     * @todo socket模式下连接参数可能有误
+     * @todo 未处理错误
+     */
+    private function connect() {
+        $params = explode(':', $this->config['connect']);
+        if (count($params) > 1) {
+            $params[] = $this->config['timeout'];
+        }
+        if ($this->config['persist']) {
+            $this->redis->pconnect(...$params);
+        } else {
+            $this->redis->connect(...$params);
+        }
+        $this->config['password'] && $this->redis->auth($this->config['password']);
+        $this->config['database'] && $this->redis->select($this->config['database']);
+    }
+
+    public function __call(string $name, array $arguments) {
+        return $this->redis->$name(...$arguments);
+    }
 }

@@ -11,11 +11,11 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "slion/slion": "^0.1",
+        "slion/slion": "dev-master",
         "illuminate/database": "^5.2"
     },
 	"autoload": {
-		"classmap": ["src/classes"]
+        "files": ["src/bootstrap.php"]
 	},
     "minimum-stability": "stable"
 }
