@@ -9,6 +9,12 @@
             "email": "andares@outlook.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "https://github.com/andares/slion.git"
+        }
+    ],
     "require": {
         "php": ">=7.0.0",
         "slion/slion": "dev-master",
