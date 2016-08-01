@@ -9,8 +9,8 @@ use Slion\Meta;
  *
  * @author andares
  */
-abstract class Vo implements \IteratorAggregate, \ArrayAccess, \Serializable, \JsonSerializable {
-    use Meta\Base, Meta\Access, Meta\Serializable, Meta\Json;
+abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \JsonSerializable {
+    use Meta\Access, Meta\Serializable, Meta\Json;
 
     protected static $fields_mapping = [];
 
