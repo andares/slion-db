@@ -14,8 +14,8 @@ abstract class Vo implements \IteratorAggregate, \ArrayAccess, \Serializable, \J
 
     protected static $fields_mapping = [];
 
-    public function __construct($data) {
-        $this->fill((is_object($data) && method_exists($data, 'toArray')) ?
+    public function __construct($data = null) {
+        $data && $this->fill((is_object($data) && method_exists($data, 'toArray')) ?
             $data->toArray() : $data);
     }
 
