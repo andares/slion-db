@@ -14,8 +14,8 @@ abstract class Vo implements \IteratorAggregate, \ArrayAccess, \Serializable, \J
 
     protected static $fields_mapping = [];
 
-    public function makeRow($row, $key = null, ...$more) {
-        $this->fill($row);
+    public function __construct($data) {
+        $this->fill($data);
     }
 
     public function fill($data) {
@@ -36,11 +36,18 @@ abstract class Vo implements \IteratorAggregate, \ArrayAccess, \Serializable, \J
      * @return array
      */
     public static function makeArray($collection, ...$more): array {
-        $result = [];
+        $result     = [];
+        $more_data  = [];
         foreach ($collection as $key => $row) {
-            $vo = new static();
+            // 多维填充
+            if ($more) {
+                $more_data = [];
+                foreach ($more as $more_collection) {
+                    $more_data[] = $more_collection[$key] ?? null;
+                }
+            }
+            $vo = new static($row, ...$more_data);
             /* @var $vo self */
-            $vo->makeRow($row, $key, ...$more);
             $result[] = $vo->confirm()->toArray();
         }
         return $result;
