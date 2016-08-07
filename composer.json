@@ -21,7 +21,8 @@
         "illuminate/database": "^5.2"
     },
 	"autoload": {
-        "files": ["src/bootstrap.php"]
+        "psr-4": {"Slion\\": "src/classes/Slion/"},
+        "files": ["src/helpers.php"]
 	},
     "minimum-stability": "stable"
 }
