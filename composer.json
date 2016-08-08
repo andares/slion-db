@@ -22,7 +22,9 @@
     },
 	"autoload": {
         "psr-4": {"Slion\\": "src/classes/Slion/"},
-        "files": ["src/helpers.php"]
+        "files": [
+            "src/bootstrap.php"
+        ]
 	},
     "minimum-stability": "stable"
 }

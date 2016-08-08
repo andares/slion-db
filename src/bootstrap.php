@@ -1,6 +1,10 @@
 <?php
-// 载入autoload
-ini_set('include_path', __DIR__ . DIRECTORY_SEPARATOR . 'classes' . PATH_SEPARATOR . ini_get('include_path'));
-
-// 载入helpers.php
-require __DIR__ . DIRECTORY_SEPARATOR . 'helpers.php';
+$run = $GLOBALS['run'];
+/* @var $run \Slion\Run */
+$run->setup('slion-db', new class(__DIR__) extends Slion\Init {
+    public function head(\Slim\App $app, \Slim\Container $container, array $settings) {
+        require "$this->root/dependencies.php";
+        require "$this->root/helpers.php";
+        require "$this->root/hooks.php";
+    }
+});

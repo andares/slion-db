@@ -36,11 +36,6 @@ class DB {
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
         $this->capsule = $capsule;
-
-        // 注册hook
-        $hook = $container->get('hook');
-        /* @var $hook \Slion\Hook */
-        $hook->attach(\Slion\HOOK_BEFORE_RESPONSE, new DB\Vo\Autoload());
     }
 
     public function __call(string $name, $arguments) {
