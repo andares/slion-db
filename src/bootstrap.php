@@ -1,4 +1,6 @@
 <?php
+use Slim\{App, Container};
+
 $run = $GLOBALS['run'];
 /* @var $run \Slion\Run */
 // setup自身
