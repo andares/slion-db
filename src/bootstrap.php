@@ -1,10 +1,12 @@
 <?php
 $run = $GLOBALS['run'];
 /* @var $run \Slion\Run */
-$run->setup('slion-db', new class(__DIR__) extends Slion\Init {
-    public function head(\Slim\App $app, \Slim\Container $container, array $settings) {
-        require "$this->root/dependencies.php";
-        require "$this->root/helpers.php";
-        require "$this->root/hooks.php";
-    }
-});
+// setup自身
+$run->add('slion-db', __DIR__)
+
+    ->setup(60, function(string $root, App $app, Container $container, array $settings) {
+        require "$root/dependencies.php";
+        require "$root/helpers.php";
+        require "$root/hooks.php";
+    }, 'load dependencies')
+;
