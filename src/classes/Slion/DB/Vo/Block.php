@@ -17,7 +17,9 @@ class Block {
 
     private $offset;
     private $limit;
+
     private $array_maker;
+    private $filter = null;
     private $list = [];
 
     public function __construct(int $offset, int $limit, callable $array_maker) {
@@ -39,28 +41,35 @@ class Block {
         return $this->limit + 1;
     }
 
+    public function setFilter(callable $filter): self {
+        $this->filter = $filter;
+        return $this;
+    }
+
     /**
      *
      * @param type $collection
+     * @param array $more
      * @param \Slion\DB\Vo\callable $filter
      * @return array
      */
-    public function __invoke($collection, callable $filter = null): array {
-        return $this->fill($collection)->toArray($filter);
+    public function __invoke($collection, ...$more): array {
+        return $this->fill($collection, ...$more)->toArray();
     }
 
     /**
      *
      * @param Collection|array $collection
+     * @param array $more
      * @return \self
      */
-    public function fill($collection): self {
+    public function fill($collection, ...$more): self {
         $array_maker = $this->array_maker;
-        $this->list = array_merge($this->list, $array_maker($collection));
+        $this->list = array_merge($this->list, $array_maker($collection, ...$more));
         return $this;
     }
 
-    public function toArray(callable $filter = null) {
+    public function toArray(): array {
         $result = [
             'offset'    => 0,
             'has_more'  => 0,
@@ -71,7 +80,7 @@ class Block {
         $lastid = 0;
         foreach ($this->list as $row) {
             // 自定义过滤器
-            if ($filter && !$filter($row)) {
+            if ($this->filter && !$this->filter($row)) {
                 continue;
             }
 

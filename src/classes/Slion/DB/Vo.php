@@ -32,8 +32,8 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
     }
 
     public static function makeBlock(int $offset, int $limit): Vo\Block {
-        return new Vo\Block($offset, $limit, function($collection) {
-            return static::makeArray($collection);
+        return new Vo\Block($offset, $limit, function($collection, ...$more) {
+            return static::makeArray($collection, ...$more);
         });
     }
 
