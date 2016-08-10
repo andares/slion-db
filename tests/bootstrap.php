@@ -14,7 +14,11 @@ require __DIR__ . '/../vendor/autoload.php';
 $run = $GLOBALS['run'];
 $run->select('slion-db')
 
-    ->setup(200, function(string $root, App $app, Container $container, array $settings, Run $r) {
+    ->setup(200, function(string $root, Run $run) {
+        $app        = $run->app();
+        $container  = $run->container();
+        $settings   = $run->settings();
+
         // 配置
         $container->get('config')->addScene('default', "$root/config");
     }, 'utils setting for unit test');
