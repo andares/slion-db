@@ -93,7 +93,8 @@ class Block {
             }
         }
 
-        $result['offset']   = $this->offset_mode == self::OFFSETMODE_COUNT ? $count : $lastid;
+        $result['offset']   = $this->offset_mode == self::OFFSETMODE_COUNT ?
+            $count : $lastid;
         $result['has_more'] = isset($this->list[$count]) ? 1 : 0;
         return $result;
     }

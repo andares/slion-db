@@ -14,7 +14,7 @@ require __DIR__ . '/../vendor/autoload.php';
 $run = $GLOBALS['run'];
 $run->select('slion-db')
 
-    ->setup(200, function(string $root, Run $run) {
+    ->setup(305, function(string $root, Run $run) {
         $app        = $run->app();
         $container  = $run->container();
         $settings   = $run->settings();
