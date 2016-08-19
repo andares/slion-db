@@ -23,21 +23,27 @@ abstract class Model extends Meta\Base implements \ArrayAccess, \Serializable, \
     protected $_id = null;
 
     public static function load($id) {
-        $data   = static::redis()->get($this->makeIdForAccess($id));
+        $data   = static::redis()->get(static::makeIdForAccess($id));
         if (!$data) {
             return null;
         }
-        return unserialize($data);
+        $model = unserialize($data);
+        $model->setId($id);
+        return $model;
     }
 
     public function save() {
-        if (static::$_expire) {
-            return static::redis()->setEx(
-                $this->makeIdForAccess($this->getId()),
-                static::$_expire, serialize($this));
+        $id = $this->getId();
+        if (!$id) {
+            throw abort(new \RuntimeException('redis model need id to save'));
         }
-        return static::redis()->set(
-            $this->makeIdForAccess($this->getId()), serialize($this));
+        $saveid = static::makeIdForAccess($id);
+        $data   = serialize($this);
+
+        if (static::$_expire) {
+            return static::redis()->setEx($saveid, static::$_expire, $data);
+        }
+        return static::redis()->set($saveid, $data);
     }
 
     public function setId($id) {
@@ -53,7 +59,7 @@ abstract class Model extends Meta\Base implements \ArrayAccess, \Serializable, \
         return $generator->uuid()->gmp_strval()->get();
     }
 
-    protected function makeIdForAccess($id): string {
+    protected static function makeIdForAccess($id): string {
         return static::$_prefix . $id;
     }
 
