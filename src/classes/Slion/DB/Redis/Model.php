@@ -31,6 +31,11 @@ abstract class Model extends Meta\Base implements \ArrayAccess, \Serializable, \
     }
 
     public function save() {
+        if (static::$_expire) {
+            return static::redis()->setEx(
+                $this->makeIdForAccess($this->getId()),
+                static::$_expire, serialize($this));
+        }
         return static::redis()->set(
             $this->makeIdForAccess($this->getId()), serialize($this));
     }
