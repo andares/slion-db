@@ -14,11 +14,11 @@ class Redis {
      */
     private static $clients = [];
 
-    private static $default_client = 'default';
+    private static $default = 'default';
 
 
     public static function instance(string $name = null): DB\Redis\Client {
-        !$name && $name = self::$default_client;
+        !$name && $name = self::$default;
 
         if (!isset(self::$clients[$name])) {
             $config = cf('database/redis')[$name];
@@ -31,8 +31,8 @@ class Redis {
     }
 
     public static function selectClient(string $name = null): string {
-        $name && self::$default_client = $name;
-        return self::$default_client;
+        $name && self::$default = $name;
+        return self::$default;
     }
 
     public static function __callStatic(string $name, array $arguments) {
