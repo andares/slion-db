@@ -37,13 +37,29 @@ abstract class Model extends Meta\Base implements \ArrayAccess, \Serializable, \
         if (!$id) {
             throw abort(new \RuntimeException('redis model need id to save'));
         }
-        $saveid = static::makeIdForAccess($id);
+        $key    = static::makeIdForAccess($id);
         $data   = serialize($this);
 
         if (static::$_expire) {
-            return static::redis()->setEx($saveid, static::$_expire, $data);
+            return static::redis()->setEx($key, static::$_expire, $data);
         }
-        return static::redis()->set($saveid, $data);
+        return static::redis()->set($key, $data);
+    }
+
+    public function delete(): int {
+        $id = $this->getId();
+        if (!$id) {
+            throw abort(new \RuntimeException('redis model need id to delete'));
+        }
+        return static::deleteByIds($id);
+    }
+
+    public static function deleteByIds(...$ids): int {
+        $keys = [];
+        foreach ($ids as $id) {
+            $keys[] = static::makeIdForAccess($id);
+        }
+        return static::redis()->del($keys);
     }
 
     public function setId($id) {
