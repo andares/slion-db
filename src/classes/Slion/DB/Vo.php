@@ -19,12 +19,18 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
             $data->toArray() : $data);
     }
 
-    public function fill($data) {
+    public function fill($data, $excludes = []) {
         if (!is_array($data) && !is_object($data)) {
             throw new \InvalidArgumentException("fill data error");
         }
 
-        foreach ($this->getDefault() as $name => $default) {
+        $fields = $this->getDefault();
+        if ($excludes) {
+            foreach ($excludes as $name) {
+                unset($fields[$name]);
+            }
+        }
+        foreach ($fields as $name => $default) {
             $field = isset(static::$fields_mapping[$name]) ? static::$fields_mapping[$name] : $name;
             isset($data[$field]) && $this->$name = $data[$field];
         }
