@@ -1,6 +1,7 @@
 <?php
 namespace Slion\DB;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Description of Model
@@ -25,6 +26,15 @@ abstract class Model extends EloquentModel {
 //    protected $casts = [
 //        'id'    => 'integer',
 //    ];
+
+    /**
+     * @todo 暂时只支持单id字段
+     * @param array $ids
+     */
+    public static function in(array $ids, string $field = null): Collection {
+        return static::query()->whereIn(
+            $field ?: (new static())->primaryKey, $ids)->get();
+    }
 
     public function confirm() {
         $this->_confirm();
