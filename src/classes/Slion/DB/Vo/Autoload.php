@@ -1,66 +1,77 @@
 <?php
 namespace Slion\DB\Vo;
 
-use Slion\Http\{Dispatcher, Response};
+use Slion\Http\{Response};
 use Slim\Collection;
 
 /**
  * Description of Autoload
+ *
+        $this->db_autoload
+            ->bind(Vo\Follow::class,    Vo\UserOther::class)
+            ->bind(Vo\UserOther::class, Vo\Room::class)
+            ->bind(Vo\Room::class,      Vo\Vdoid::class)
+            ->bind(Vo\Vdoid::class,     Vo\Column::class);
+        $response->follow_list = Vo\Follow::makeArray(
+            Models\Follow::getFollowList($user->getId()),
+            $this->db_autoload);
  *
  * @author andares
  */
 class Autoload {
 
     /**
-     * 注意这个是全局的
+     * 在一个autoload中绑定自动载入的对应关系
      * @var array
      */
-    private static $mask = [];
+    private $binds = [];
 
     /**
      *
      * @var array
      */
-    private static $ids = [];
+    private $ids = [];
 
     /**
      *
      * @var array
      */
-    private static $loaded_ids = [];
+    private $loaded_ids = [];
 
-    public static function add(string $class, int $method, ...$ids) {
-        !isset(self::$ids[$class][$method]) && self::$ids[$class][$method] = [];
-        self::$ids[$class][$method] = array_unique(
-            array_merge(self::$ids[$class][$method],
+    public function bind(string $master_vo_class, ...$bind_vo_class): self {
+        $this->binds[$master_vo_class] = $bind_vo_class;
+        return $this;
+    }
+
+    public function unbind(string $master_vo_class): self {
+        unset($this->binds[$master_vo_class]);
+        return $this;
+    }
+
+    public function resetBinds(): self {
+        $this->binds = [];
+        return $this;
+    }
+
+    public function getBindsByMasterClass(string $master_vo_class): array {
+        return $this->binds[$master_vo_class] ?? [];
+    }
+
+    public function add(string $class, int $method, ...$ids) {
+        !isset($this->ids[$class][$method]) && $this->ids[$class][$method] = [];
+        $this->ids[$class][$method] = array_unique(
+            array_merge($this->ids[$class][$method],
                 count($ids) > 1 ? [$ids] : $ids),
             \SORT_REGULAR);
     }
 
-    public static function setMask(string $class, $mask = null) {
-        if (is_array($mask)) {
-            self::$mask[$class] = $mask;
-        } else {
-            unset(self::$mask[$class]);
-        }
-    }
-
-    public static function getMask(string $class) {
-        return self::$mask[$class] ?? null;
-    }
-
-    public static function cleanMask() {
-        self::$mask = [];
-    }
-
-    public function __invoke(\Slion\Run $run, Response $response, ...$args) {
-        $collection = new Collection;
-
+    public function __invoke() {
+        $loads = new Collection;
         do {
             list($class, $method, $ids) = $this->fetchIds();
             if ($class && $ids) {
                 $name = $class::getName();
-                if (isset($collection[$name])) {
+                if (isset($loads[$name])) {
                     $appender = function(array $list) use ($name) {
                         foreach ($list as $id => $row) {
                             if (isset($this->data[$name][$id])) {
@@ -69,21 +80,44 @@ class Autoload {
                             $this->data[$name][$id] = $row;
                         }
                     };
-                    $appender->call($collection,
-                        $class::autoloadHandler($ids, $method));
+                    $appender->call($loads,
+                        $class::autoloadHandler($this, $ids, $method));
                 } else {
-                    $collection[$name] = $class::autoloadHandler($ids, $method);
+                    $loads[$name] = $class::autoloadHandler($this,
+                        $ids, $method);
                 }
             }
         } while($class);
 
-        $response->setChannelData('autoload', $collection);
-        self::cleanMask();
-        self::$loaded_ids = [];
+        return $loads;
     }
 
     /**
-     * 防重复
+     * 取出当前要自动载入的vo的所有ids列表及读取方法
+     * @return array
+     */
+    private function fetchIds(): array {
+        $class = key($this->ids);
+        if (!$class) {
+            return [null, null, null];
+        }
+
+        // 这里默认method层与class同步
+        $method = key($this->ids[$class]);
+        $ids    = $this->getIdsWithoutLoaded($class, $method,
+            $this->ids[$class][$method]);
+        unset($this->ids[$class][$method]);
+        if (!$this->ids[$class]) {
+            unset($this->ids[$class]);
+        }
+
+        return [$class, $method, $ids];
+    }
+
+    /**
+     * 防重复。
+     *
+     * @todo 在应用了cabin后再考虑是否移除。
      * @param string $class
      * @param array $ids
      * @return array
@@ -91,32 +125,14 @@ class Autoload {
     private function getIdsWithoutLoaded(string $class,
         int $method, array $ids): array {
 
-        if (isset(self::$loaded_ids[$class][$method])) {
-            $ids = array_diff($ids, self::$loaded_ids[$class][$method]);
-            self::$loaded_ids[$class][$method] = array_merge(
-                self::$loaded_ids[$class][$method], $ids);
+        if (isset($this->loaded_ids[$class][$method])) {
+            $ids = array_diff($ids, $this->loaded_ids[$class][$method]);
+            $this->loaded_ids[$class][$method] = array_merge(
+                $this->loaded_ids[$class][$method], $ids);
             return $ids;
         }
 
-        self::$loaded_ids[$class][$method] = $ids;
+        $this->loaded_ids[$class][$method] = $ids;
         return $ids;
-    }
-
-    private function fetchIds(): array {
-        $class = key(self::$ids);
-        if (!$class) {
-            return [null, null, null];
-        }
-
-        // 这里默认method层与class同步
-        $method = key(self::$ids[$class]);
-        $ids    = $this->getIdsWithoutLoaded($class, $method,
-            self::$ids[$class][$method]);
-        unset(self::$ids[$class][$method]);
-        if (!self::$ids[$class]) {
-            unset(self::$ids[$class]);
-        }
-
-        return [$class, $method, $ids];
     }
 }

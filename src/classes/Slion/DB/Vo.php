@@ -24,11 +24,22 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
 
     protected static $_autoload_method = [];
 
+    /**
+     *
+     * @param type $data
+     */
     public function __construct($data = null) {
         $data && $this->fill((is_object($data) && method_exists($data, 'toArray')) ?
             $data->toArray() : $data);
     }
 
+    /**
+     *
+     * @param type $data
+     * @param type $excludes
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
     public function fill($data, $excludes = []) {
         if (!is_array($data) && !is_object($data)) {
             throw new \InvalidArgumentException("fill data error");
@@ -47,22 +58,12 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
         return $this;
     }
 
+    /**
+     * vo默认输出名。目前只用在autoload中。
+     * @return string
+     */
     public static function getName(): string {
         return static::$_name ?: static::class;
-    }
-
-    /**
-     * 设置autoload mask。
-     *
-     * 设置为数组则表示只处理哪些自动载入。如果给个空数组则不进行autoload。
-     * 如果设置null则表示使用全量的autoload配置。
-     *
-     * mask信息会在一次完整的autoload后被清除。
-     *
-     * @param array|null $mask
-     */
-    public static function setAutoloadMask($mask = null) {
-        Vo\Autoload::setMask(static::class, $mask);
     }
 
     /**
@@ -70,8 +71,15 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
      * @param array $ids
      * @return array
      */
-    public static function autoloadHandler(array $ids, int $method = 0): array {}
+    public static function autoloadHandler(Vo\Autoload $autoload,
+        array $ids, int $method = 0): array {}
 
+    /**
+     *
+     * @param int $offset
+     * @param int $limit
+     * @return \Slion\DB\Vo\Block
+     */
     public static function makeBlock(int $offset, int $limit): Vo\Block {
         return new Vo\Block($offset, $limit, function($collection, ...$more) {
             return static::makeArray($collection, ...$more);
@@ -91,7 +99,13 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
         return $result;
     }
 
-    public static function makeCollection($collection, ...$more) {
+    /**
+     *
+     * @param type $collection
+     * @param type $more
+     * @return type
+     */
+    public static function makeIndexedArray($collection, ...$more) {
         $result = [];
         foreach (static::unionData($collection, ...$more) as $vo) {
             $row = $vo->toArray();
@@ -104,7 +118,19 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
         return $result;
     }
 
+    /**
+     * 这里有一个较为hack的实现，即$more的末个参数将被检查是否是autoload对象？
+     * 是的话将进行add操作。
+     *
+     * @param type $collection
+     * @param type $more
+     */
     protected static function unionData($collection, ...$more) {
+        $autoload = array_pop($more);
+        if (!($autoload instanceof Vo\Autoload)) {
+            $autoload = null;
+        }
+
         $more_data  = [];
         foreach ($collection as $key => $row) {
             // 多维填充
@@ -117,26 +143,28 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
             $vo = new static($row, ...$more_data);
             /* @var $vo self */
             $vo->confirm();
-            static::addAutoloadIds($vo);
+            $autoload && static::addAutoloadIds($autoload, $vo);
+
             yield $vo;
         }
     }
 
-    protected static function addAutoloadIds(self $vo) {
-        // 取autoload列表
-        $mask = Vo\Autoload::getMask(static::class);
-        if (is_array($mask)) {
-            $autoload_vo_list = [];
-            foreach ($mask as $class) {
-                isset(static::$_autoload[$class]) &&
-                    $autoload_vo_list[$class] = static::$_autoload[$class];
-            }
-        } else {
-            $autoload_vo_list = static::$_autoload;
+    /**
+     *
+     * @param self $vo
+     */
+    private static function addAutoloadIds(Vo\Autoload $autoload, self $vo) {
+        $binds = $autoload->getBindsByMasterClass(static::class);
+        if (!$binds) {
+            return false;
         }
 
-        foreach ($autoload_vo_list as $class => $id_field) {
-            $method = static::$_autoload_method[$class] ?? 0;
+        foreach ($binds as $class) {
+            if (!isset(static::$_autoload[$class])) {
+                continue;
+            }
+            $id_field   = static::$_autoload[$class];
+            $method     = static::$_autoload_method[$class] ?? 0;
 
             if (is_array($id_field)) {
                 // 支持二层数组
@@ -150,18 +178,19 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
                             }
                             $ids[] = $vo->$field;
                         }
-                        Vo\Autoload::add($class, $method, ...$ids);
+                        $autoload->add($class, $method, ...$ids);
                     }
                 } else {
                     $ids = [];
                     foreach ($id_field as $field) {
                         $ids[] = $vo->$field;
                     }
-                    Vo\Autoload::add($class, $method, ...$ids);
+                    $autoload->add($class, $method, ...$ids);
                 }
-                continue;
+            } else {
+                $autoload->add($class, $method, $vo->$id_field);
             }
-            Vo\Autoload::add($class, $method, $vo->$id_field);
         }
+        return true;
     }
 }
