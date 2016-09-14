@@ -143,17 +143,16 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
             $vo = new static($row, ...$more_data);
             /* @var $vo self */
             $vo->confirm();
-            $autoload && static::addAutoloadIds($autoload, $vo);
-
+            $autoload && $vo->addAutoloadIds($autoload);
             yield $vo;
         }
     }
 
     /**
      *
-     * @param self $vo
+     * @param self $this
      */
-    private static function addAutoloadIds(Vo\Autoload $autoload, self $vo) {
+    public function addAutoloadIds(Vo\Autoload $autoload) {
         $binds = $autoload->getBindsByMasterClass(static::class);
         if (!$binds) {
             return false;
@@ -173,22 +172,29 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
                     foreach ($id_field as $id_field_more) {
                         $ids = [];
                         foreach ($id_field_more as $field) {
-                            if ($vo->$field === null) {
+                            if ($this->$field === null ||
+                                $autoload->Unmasked(static::class, $field)) {
+
                                 continue 2; // 防止填null
                             }
-                            $ids[] = $vo->$field;
+                            $ids[] = $this->$field;
                         }
                         $autoload->add($class, $method, ...$ids);
                     }
                 } else {
                     $ids = [];
                     foreach ($id_field as $field) {
-                        $ids[] = $vo->$field;
+                        if ($autoload->Unmasked(static::class, $field)) {
+                            $ids = [];
+                            break;
+                        }
+                        $ids[] = $this->$field;
                     }
-                    $autoload->add($class, $method, ...$ids);
+                    $ids && $autoload->add($class, $method, ...$ids);
                 }
             } else {
-                $autoload->add($class, $method, $vo->$id_field);
+                !$autoload->Unmasked(static::class, $id_field) &&
+                    $autoload->add($class, $method, $this->$id_field);
             }
         }
         return true;

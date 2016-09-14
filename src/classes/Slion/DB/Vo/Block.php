@@ -12,7 +12,7 @@ class Block {
     const OFFSETMODE_ID    = 1;
     const OFFSETMODE_COUNT = 2;
 
-    private $id_field       = 'id';
+    private $id_fetcher     = null;
     private $offset_mode    = self::OFFSETMODE_COUNT;
 
     private $offset;
@@ -28,8 +28,8 @@ class Block {
         $this->array_maker = $array_maker;
     }
 
-    public function setIdField(string $id_field): self {
-        $this->id_field = $id_field;
+    public function setIdFetcher(callable $fetcher): self {
+        $this->id_fetcher = $fetcher;
         return $this;
     }
 
@@ -76,17 +76,19 @@ class Block {
             'list'      => [],
         ];
 
-        $count  = 0;
-        $lastid = 0;
+        $count      = 0;
+        $lastid     = 0;
+        $fetcher    = $this->id_fetcher;
+        $filter     = $this->filter;
         foreach ($this->list as $row) {
             // 自定义过滤器
-            if ($this->filter && !$this->filter($row)) {
+            if ($filter && !$filter($row)) {
                 continue;
             }
 
             $result['list'][] = $row;
             $count++;
-            $lastid = $row[$this->id_field];
+            $fetcher && $lastid  = $fetcher($row);
 
             if ($count == $this->limit) {
                 break;
@@ -94,7 +96,7 @@ class Block {
         }
 
         $result['offset']   = $this->offset_mode == self::OFFSETMODE_COUNT ?
-            $count : $lastid;
+            ($this->offset + $count) : $lastid;
         $result['has_more'] = isset($this->list[$count]) ? 1 : 0;
         return $result;
     }

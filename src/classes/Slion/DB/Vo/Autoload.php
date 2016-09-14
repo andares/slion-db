@@ -30,6 +30,12 @@ class Autoload {
      *
      * @var array
      */
+    private $masked = [];
+
+    /**
+     *
+     * @var array
+     */
     private $ids = [];
 
     /**
@@ -38,9 +44,22 @@ class Autoload {
      */
     private $loaded_ids = [];
 
-    public function bind(string $master_vo_class, ...$bind_vo_class): self {
-        $this->binds[$master_vo_class] = $bind_vo_class;
+    public function bind(string $master_vo_class, ...$bind_vo_classes): self {
+        $this->binds[$master_vo_class] = $bind_vo_classes;
         return $this;
+    }
+
+    public function mask(string $vo_class, ...$mask_fields):self {
+        $this->masked[$vo_class] = [];
+        foreach ($mask_fields as $field) {
+            $this->masked[$vo_class][$field] = 1;
+        }
+        return $this;
+    }
+
+    public function Unmasked(string $vo_class, string $field): bool {
+        return isset($this->masked[$vo_class]) &&
+            !isset($this->masked[$vo_class][$field]);
     }
 
     public function unbind(string $master_vo_class): self {
