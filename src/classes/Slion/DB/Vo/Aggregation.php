@@ -1,8 +1,6 @@
 <?php
 namespace Slion\DB\Vo;
 
-use Slim\Collection;
-
 /**
  * Description of Autoload
  *
@@ -11,7 +9,7 @@ use Slim\Collection;
 trait Aggregation {
     abstract protected static function base(): array;
     abstract protected static function bind(Autoload $autoload);
-    abstract protected function pull(Collection $loads): self;
+    abstract protected function pull(\Slim\Collection $loads): \Slion\DB\Vo;
 
     protected static function unionData($collection, ...$more) {
         $autoload = array_pop($more);
