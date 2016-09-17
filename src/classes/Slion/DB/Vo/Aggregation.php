@@ -10,7 +10,7 @@ use Slim\Collection;
  */
 trait Aggregation {
     abstract protected static function base(): array;
-    abstract protected static function bind(Vo\Autoload $autoload);
+    abstract protected static function bind(Autoload $autoload);
     abstract protected function pull(Collection $loads): self;
 
     protected static function unionData($collection, ...$more) {
