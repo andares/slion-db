@@ -9,7 +9,7 @@ namespace Slion\DB\Vo;
 trait Aggregation {
     abstract protected static function base(): array;
     abstract protected static function bind(Autoload $autoload);
-    abstract protected function pull(\Slim\Collection $loads): \Slion\DB\Vo;
+    abstract protected function pull(\Slim\Collection $loads): self;
 
     protected static function unionData($collection, ...$more) {
         $autoload = array_pop($more);
