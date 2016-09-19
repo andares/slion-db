@@ -30,9 +30,15 @@ abstract class Model extends EloquentModel {
     /**
      * @todo 暂时只支持单id字段
      * @param array $ids
+     * @param string $field
+     * @param callable $mod
      */
-    public static function in(array $ids, string $field = null): Collection {
-        return static::query()->whereIn(
+    public static function in(array $ids, string $field = null,
+        callable $mod = null): Collection {
+
+        $builder = static::query();
+        $mod && $buider = $mod($builder);
+        return $buider->whereIn(
             $field ?: (new static())->primaryKey, $ids)->get();
     }
 
