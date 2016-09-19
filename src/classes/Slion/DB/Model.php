@@ -37,8 +37,8 @@ abstract class Model extends EloquentModel {
         callable $mod = null): Collection {
 
         $builder = static::query();
-        $mod && $buider = $mod($builder);
-        return $buider->whereIn(
+        $mod && $builder = $mod($builder);
+        return $builder->whereIn(
             $field ?: (new static())->primaryKey, $ids)->get();
     }
 
