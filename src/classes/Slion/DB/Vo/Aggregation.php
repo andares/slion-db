@@ -36,7 +36,11 @@ trait Aggregation {
                 $base_vo->confirm();
                 $autoload && $base_vo->addAutoloadIds($autoload);
 
-                is_string($base_field) && $vo->$base_field = $base_vo;
+                if (is_string($base_field)) {
+                    $vo->$base_field = $base_vo;
+                } else {
+                    $vo->fill($base_vo);
+                }
             }
             /* @var $vo self */
             $temp[] = $vo;
