@@ -64,6 +64,7 @@ class Autoload {
 
     public function unbind(string $master_vo_class): self {
         unset($this->binds[$master_vo_class]);
+        unset($this->masked[$master_vo_class]);
         return $this;
     }
 
