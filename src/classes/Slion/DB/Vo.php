@@ -52,8 +52,14 @@ abstract class Vo extends Meta\Base implements \ArrayAccess, \Serializable, \Jso
             }
         }
         foreach ($fields as $name => $default) {
-            $field = isset(static::$_fields_mapping[$name]) ? static::$_fields_mapping[$name] : $name;
-            isset($data[$field]) && $this->$name = $data[$field];
+            // 只要有值就赋值
+            isset($data[$name]) && $this->$name = $data[$name];
+
+            // 映射赋值
+            if (isset(static::$_fields_mapping[$name])) {
+                $mapped = static::$_fields_mapping[$name];
+                isset($data[$mapped]) && $this->$name = $data[$mapped];
+            }
         }
         return $this;
     }
