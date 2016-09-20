@@ -9,7 +9,12 @@ namespace Slion\DB\Vo;
 trait Aggregation {
     abstract protected static function base(): array;
     abstract protected static function bind(Autoload $autoload);
-    abstract protected function pull(\Slim\Collection $loads): self;
+
+    /**
+     * @param \Slim\Collection $loads
+     * @return self|null
+     */
+    abstract protected function pull(\Slim\Collection $loads);
 
     protected static function unionData($collection, ...$more) {
         $autoload = array_pop($more);
@@ -47,9 +52,10 @@ trait Aggregation {
 
         $loads = $autoload();
         foreach ($temp as $vo) {
-            $vo->pull($loads);
-            $vo->confirm();
-            yield $vo;
+            if ($vo->pull($loads)) {
+                $vo->confirm();
+                yield $vo;
+            }
         }
     }
 
