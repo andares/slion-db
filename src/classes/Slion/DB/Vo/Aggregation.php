@@ -33,7 +33,6 @@ trait Aggregation {
             $vo = new static();
             foreach ($base as $base_field => $base_class) {
                 $base_vo = new $base_class($row, ...$more_data);
-                $base_vo->confirm();
                 $autoload && $base_vo->addAutoloadIds($autoload);
 
                 if (is_string($base_field)) {
