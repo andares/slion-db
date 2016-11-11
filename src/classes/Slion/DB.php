@@ -43,6 +43,13 @@ class DB {
     }
 
     public static function __callStatic($method, $parameters) {
-        return Manager::$method(...$parameters);
+        try {
+            return Manager::$method(...$parameters);
+        } catch (\Throwable $exc) {
+            if ($exc->getMessage() !=
+                'Call to a member function getConnection() on null') {
+                throw $exc;
+            }
+        }
     }
 }
