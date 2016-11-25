@@ -42,6 +42,14 @@ abstract class Model extends EloquentModel {
             $field ?: (new static())->primaryKey, $ids)->get();
     }
 
+    public function mustExists(): self {
+        if (!$this->exists) {
+            // TODO 以后换掉违例类
+            throw new \Exception('model is not exists');
+        }
+        return $this;
+    }
+
     public function confirm() {
         $this->_confirm();
         return $this;
