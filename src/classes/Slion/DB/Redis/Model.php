@@ -58,7 +58,7 @@ abstract class Model extends Meta\Base implements \ArrayAccess, \Serializable, \
         if (!$id) {
             throw abort(new \RuntimeException('redis model need id to delete'));
         }
-        $model->exists = false;
+        $this->exists = false;
         return static::deleteByIds($id);
     }
 
