@@ -34,6 +34,7 @@ abstract class Model extends Meta\Base implements \ArrayAccess, \Serializable, \
         }
         $model = unserialize($data);
         $model->setId($id);
+        $model->exists = true;
         return $model;
     }
 
@@ -57,6 +58,7 @@ abstract class Model extends Meta\Base implements \ArrayAccess, \Serializable, \
         if (!$id) {
             throw abort(new \RuntimeException('redis model need id to delete'));
         }
+        $model->exists = false;
         return static::deleteByIds($id);
     }
 
