@@ -29,6 +29,14 @@ class Client {
     }
 
     /**
+     *
+     * @return \Redis
+     */
+    public function raw(): \Redis {
+        return $this->redis;
+    }
+
+    /**
      * @todo socket模式下连接参数可能有误
      * @todo 未处理错误
      */
